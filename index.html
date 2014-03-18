@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>BulletGraph Demo</title>
+	<link rel="stylesheet" href="js/widgets/charting/css/BulletGraph.css" type="text/css" />
+	<script>
+        // Instead of using data-dojo-config, we're creating a dojoConfig
+        // object *before* we load dojo.js; they're functionally identical,
+        // it's just easier to read this approach with a larger configuration.
+        var dojoConfig = {
+            async: true,
+            // This code registers the correct location of the "demo"
+            // package so we can load Dojo from the CDN whilst still
+            // being able to load local modules
+            packages: [{
+                name: "custom",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/js'
+            }]
+        };
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/dojo/1.9.3/dojo/dojo.js"></script>
+	<script>
+		require(["dojo/parser", "dojo/_base/lang",  "dojo/on", "dojo/store/Memory", "dojo/store/Observable", "custom/widgets/charting/BulletGraph", "dojo/domReady!"],
+		function(parser, lang, on, Memory, Observable, BulletGraph){
+			var data1 = [
+			  {"title":"Revenue","subtitle":"US$, in thousands","ranges":[150,225,300],"measures":[220,270],"markers":[250], "id": 1},
+			  {"title":"Profit","subtitle":"%","ranges":[20,25,30],"measures":[21,23],"markers":[26], "id": 2},
+			  {"title":"Order Size","subtitle":"US$, average","ranges":[350,500,600],"measures":[100,320],"markers":[550], "id": 3},
+			  {"title":"New Customers","subtitle":"count","ranges":[1400,2000,2500],"measures":[1000,1650],"markers":[2100], "id": 4},
+			  {"title":"Satisfaction","subtitle":"out of 5","ranges":[3.5,4.25,5],"measures":[3.2,4.7],"markers":[4.4], "id": 5}
+			];
+
+				var data2 = [
+			  {"title":"Changed","subtitle":"US$, in thousands","ranges":[90,140,300],"measures":[143],"markers":[200] , "id": 1},
+			  {"title":"Profit","subtitle":"%","ranges":[100,200,220],"measures":[90,142],"markers":[200], "id": 2},
+			  {"title":"Order Size","subtitle":"US$, average","ranges":[35,50,60],"measures":[10,32],"markers":[55], "id": 3},
+			  {"title":"New Customers","subtitle":"count","ranges":[1400,2000,2500],"measures":[1600,2460],"markers":[2100], "id": 4},
+			  {"title":"Satisfaction","subtitle":"out of 5","ranges":[3.5,4.25,10],"measures":[3.2,4.7],"markers":[4.4], "id": 5}
+			]
+			
+			parser.parse();
+			var store = new Observable(new Memory({data: lang.clone(data1)}));
+			dijit.registry.byId('bg2').set("store", store);
+			
+			var store1 = new Observable(new Memory({data: lang.clone(data1)}));
+			dijit.registry.byId('bg3').set("store", store1);
+			
+			var store2 = new Observable(new Memory({data: []}));
+			dijit.registry.byId('bg4').set("store", store2);
+			
+			on(document.getElementById("updateBtn"), "click", (function(){
+				var dataset = 1;
+				
+				return function(){
+					var data;
+					if(dataset === 1){dataset = 2; data = data2;}else{dataset = 1;data = data1;}
+					for(var i = 0;i<data.length;i++){
+						store.put(data[i]);
+					}
+				}
+				
+			
+			})());
+			var counter = 5;
+			on(document.getElementById("removeBtn"), "click", function(){
+				if(counter < 1){return;}
+				store1.remove(counter--);
+			});
+			
+			var addCounter = 0;
+			on(document.getElementById("addBtn"), "click", function(){
+				if(addCounter > 4){return};
+				store2.add(lang.clone(data1[addCounter++]));
+				
+			});
+			
+		});
+		
+		
+		
+		
+	</script>
+	
+</head>
+<body>
+	<h1>Dojo BulletGraph</h1>
+	<h2>Basics</h2>
+	<p>Set a store and go</p>
+	
+	<div data-dojo-type="dojo/store/Memory" jsid="bg1Store" data-dojo-props='data: [
+			  {"title":"Revenue","subtitle":"US$, in thousands","ranges":[150,225,300],"measures":[220,270],"markers":[250], "id": 1},
+			  {"title":"Profit","subtitle":"%","ranges":[20,25,30],"measures":[21,23],"markers":[26], "id": 2}
+			]'>
+	<div data-dojo-type="custom/widgets/charting/BulletGraph" id="bg1" data-dojo-props="store: bg1Store"></div>
+	
+	
+	<h2>Simple Store API</h2>
+	<p>Update data by updating the underlying store
+	<pre><code> store.put({id: ..., ranges:[], ...})</code></pre>
+	<div data-dojo-type="custom/widgets/charting/BulletGraph" id="bg2"></div>
+	<button id="updateBtn">Update</button>
+	</p>
+	
+	<p>Remove data by deleting from the underlying store
+	<pre><code> store.remove(id)</code></pre>
+	<div data-dojo-type="custom/widgets/charting/BulletGraph" id="bg3"></div>
+	<button id="removeBtn">Remove</button>
+	</p>
+	
+	<p>Add data by add to the underlying store
+	<pre><code> store.add({id: ..., ranges:[], ...})</code></pre>
+	<div data-dojo-type="custom/widgets/charting/BulletGraph" id="bg4"></div>
+	<button id="addBtn">Add</button>
+	</p>
+	
+	
+	<h2>Technologies</h2>
+	<ul>
+		<li>Dojo
+			<ul>
+				<li>Dijit - an (awesome) widget framework.</li>
+				<li>dojo/store - simple interface for data driven app</li>
+				
+			</ul>
+		</li>
+		<li><a href="http://d3js.org/">D3js</a>- Data Driven Documents</li>
+	</ul>
+	
+	<h2>TODO</h2>
+	<ul>
+		<li>Add way to set value with click.*</li>
+		<li>Build out more interesting custom font set</li>
+		<li>Add keyboard support (up/right increase, down/left decrease)</li>
+	</ul>
+	
+	*most likely I will just wrap each character in a span with onclick handler
+
+</body>
+</html>
+
+
